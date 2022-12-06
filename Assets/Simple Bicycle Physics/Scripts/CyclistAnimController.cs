@@ -52,9 +52,9 @@ namespace SBPScripts
                     if (bicycleStatus.onBike)
                     {
                         if(prevLocalPosX<0)
-                            anim.Play("OnBike");
+                        anim.Play("OnBike");
                         else
-                            anim.Play("OnBikeFlipped");
+                        anim.Play("OnBikeFlipped");
                         StartCoroutine(AdjustRigWeight(0));
                     }
                     else

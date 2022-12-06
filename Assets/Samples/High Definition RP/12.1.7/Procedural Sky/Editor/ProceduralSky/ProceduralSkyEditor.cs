@@ -5,15 +5,15 @@ namespace UnityEditor.Rendering.HighDefinition
 {
     [CanEditMultipleObjects]
     [VolumeComponentEditor(typeof(ProceduralSky))]
-    class ProceduralSkySettingsEditor
+    internal class ProceduralSkySettingsEditor
         : SkySettingsEditor
     {
-        SerializedDataParameter m_SunSize;
-        SerializedDataParameter m_SunSizeConvergence;
-        SerializedDataParameter m_AtmosphericThickness;
-        SerializedDataParameter m_SkyTint;
-        SerializedDataParameter m_GroundColor;
-        SerializedDataParameter m_EnableSunDisk;
+        private SerializedDataParameter m_SunSize;
+        private SerializedDataParameter m_SunSizeConvergence;
+        private SerializedDataParameter m_AtmosphericThickness;
+        private SerializedDataParameter m_SkyTint;
+        private SerializedDataParameter m_GroundColor;
+        private SerializedDataParameter m_EnableSunDisk;
 
         public override void OnEnable()
         {

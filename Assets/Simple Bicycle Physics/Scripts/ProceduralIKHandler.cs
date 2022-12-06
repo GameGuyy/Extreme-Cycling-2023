@@ -59,8 +59,9 @@ public class ProceduralIKHandler : MonoBehaviour
     float delayBunnyHopCounterWeight;
     float stuntModeBody, stuntModeRotation;
     Vector3 stuntModeHead;
-    Vector3 impactDirection;
+    Vector3 impact,impactDirection;
     Vector3 velocity = Vector3.zero;
+    float wheelieFactor;
 
     void Start()
     {
@@ -124,7 +125,8 @@ public class ProceduralIKHandler : MonoBehaviour
             yDampHip = Mathf.Clamp(yDampHip, -0.005f, 0.005f);
 
             //Impact
-            impactDirection = Vector3.SmoothDamp(impactDirection, -bicycleController.deceleration*0.1f, ref velocity, bodyDampingProperties.impactDamping);
+            impact = Vector3.SmoothDamp(impact, -bicycleController.deceleration*0.1f, ref velocity, bodyDampingProperties.impactDamping);
+            impactDirection = transform.InverseTransformDirection(impact); 
 
         }
 
@@ -162,7 +164,9 @@ public class ProceduralIKHandler : MonoBehaviour
         stuntModeHead = transform.InverseTransformDirection(bicycleController.rb.velocity);
         else
         stuntModeHead = Vector3.Lerp(stuntModeHead,Vector3.zero,Time.deltaTime*10);
-        headIKTarget.transform.localPosition = new Vector3(bicycleController.customLeanAxis * 1.5f + animatedNoise*bicycleController.pickUpSpeed + stuntModeHead.x, 1-(bicycleController.pickUpSpeed*1.5f)+animatedNoise - bicycleController.bunnyHopAmount*0.5f + bunnyHopCounterWeight * 1.5f,animatedNoise*3 + stuntModeHead.z) + headOffset + impactDirection*bodyDampingProperties.impactIntensity;
+        wheelieFactor += bicycleController.wheelieInput&&bicycleController.wheeliePower>100?Time.deltaTime*2:-Time.deltaTime;
+        wheelieFactor = Mathf.Clamp01(wheelieFactor);
+        headIKTarget.transform.localPosition = new Vector3(bicycleController.customLeanAxis * 1.5f + animatedNoise*bicycleController.pickUpSpeed + stuntModeHead.x, 1-(bicycleController.pickUpSpeed*1.5f)+animatedNoise - bicycleController.bunnyHopAmount*0.5f + bunnyHopCounterWeight * 1.5f,animatedNoise*3 + stuntModeHead.z - wheelieFactor*3) + headOffset + impactDirection*bodyDampingProperties.impactIntensity*0.5f;
 
         //Additional Features
         //Hip Vertical Oscillation increases on slopes

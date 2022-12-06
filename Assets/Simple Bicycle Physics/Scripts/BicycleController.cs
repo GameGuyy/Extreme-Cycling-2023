@@ -35,7 +35,7 @@ namespace SBPScripts
         public RecordingState recordingState = RecordingState.DoNothing;
         [Range(1, 10)]
         public int frameIncrement;
-        [HideInInspector]
+        //[HideInInspector]
         public List<Vector3> bicyclePositionTransform;
         [HideInInspector]
         public List<Quaternion> bicycleRotationTransform;
@@ -113,6 +113,11 @@ namespace SBPScripts
         [HideInInspector]
         public float customSteerAxis, customLeanAxis, customAccelerationAxis, rawCustomAccelerationAxis;
         bool isRaw, sprint;
+        [HideInInspector]
+        public bool wheelieInput;
+        [HideInInspector]
+        public float wheeliePower;
+        public bool wheelieToggle;
         [HideInInspector]
         public int bunnyHopInputState;
         [HideInInspector]
@@ -306,7 +311,7 @@ namespace SBPScripts
             //AirControl
             if (Physics.Raycast(transform.position + new Vector3(0, 1f, 0), Vector3.down, out hit, Mathf.Infinity))
             {
-                if (hit.distance > 1.5f || impactFrames > 0)
+                if (hit.distance > 2f || impactFrames > 0)
                 {
                     isAirborne = true;
                     restingCrank = 100;
@@ -346,6 +351,18 @@ namespace SBPScripts
             {
                 //Pre-version 1.5
                 transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, turnLeanAmount + cycleOscillation + GroundConformity(groundConformity));
+            }
+            //Wheelie
+            if(!isAirborne && wheelieInput && rawCustomAccelerationAxis>0)
+            {
+                rb.angularDrag = 15;
+                wheeliePower = customAccelerationAxis*150*System.Convert.ToInt32(wheelieToggle);
+                var rot = Quaternion.FromToRotation(transform.forward, new Vector3(transform.forward.x,0.75f,transform.forward.z));
+                rb.AddTorque(new Vector3(rot.x, rot.y, rot.z) * wheeliePower, ForceMode.Acceleration);
+            }
+            else
+            {
+                rb.angularDrag = 1;
             }
 
 
@@ -392,6 +409,8 @@ namespace SBPScripts
                 CustomInput("Vertical", ref rawCustomAccelerationAxis, 1, 1, true);
 
                 sprint = Input.GetKey(KeyCode.LeftShift);
+
+                wheelieInput = Input.GetKey(KeyCode.LeftControl);
 
                 //Stateful Input - bunny hopping
                 if (Input.GetKey(KeyCode.Space))
@@ -485,7 +504,7 @@ namespace SBPScripts
     }
 }
 
-//***MOBILE CONTROLS****//
+//***MOBILE CONTROLS****// TO USE: uncomment all the code below this and comment all code above this line
 
 // using System.Collections;
 // using System.Collections.Generic;
@@ -557,6 +576,7 @@ namespace SBPScripts
 //         public MobileButtonHandler bHop;
 //         [HideInInspector]
 //         public int prevBHopInput;
+//         public MobileButtonHandler wheelie;
 
 //     }
 //     public class BicycleController : MonoBehaviour
@@ -617,6 +637,11 @@ namespace SBPScripts
 //         [HideInInspector]
 //         public float customSteerAxis, customLeanAxis, customAccelerationAxis, rawCustomAccelerationAxis;
 //         bool isRaw, sprint;
+//         [HideInInspector]
+//         public bool wheelieInput;
+//         [HideInInspector]
+//         public float wheeliePower;
+//         public bool wheelieToggle;
 //         [HideInInspector]
 //         public int bunnyHopInputState;
 //         [HideInInspector]
@@ -689,6 +714,7 @@ namespace SBPScripts
 //             mobileControls.right = GameObject.Find("Right").GetComponent<MobileButtonHandler>();
 //             mobileControls.sprint = GameObject.Find("Sprint").GetComponent<MobileButtonHandler>();
 //             mobileControls.bHop = GameObject.Find("BHop").GetComponent<MobileButtonHandler>();
+//             mobileControls.wheelie = GameObject.Find("Wheelie").GetComponent<MobileButtonHandler>();
 //         }
 
 //         void FixedUpdate()
@@ -862,6 +888,18 @@ namespace SBPScripts
 //                 //Pre-version 1.5
 //                 transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, turnLeanAmount + cycleOscillation + GroundConformity(groundConformity));
 //             }
+//             //Wheelie
+//             if(!isAirborne && wheelieInput && rawCustomAccelerationAxis>0)
+//             {
+//                 rb.angularDrag = 15;
+//                 wheeliePower = customAccelerationAxis*150*System.Convert.ToInt32(wheelieToggle);
+//                 var rot = Quaternion.FromToRotation(transform.forward, new Vector3(transform.forward.x,0.75f,transform.forward.z));
+//                 rb.AddTorque(new Vector3(rot.x, rot.y, rot.z) * wheeliePower, ForceMode.Acceleration);
+//             }
+//             else
+//             {
+//                 rb.angularDrag = 1;
+//             }
 
 
 //         }
@@ -924,6 +962,9 @@ namespace SBPScripts
 //                     sprint = mobileControls.sprint.buttonPressed == 1? true : false;
 //                 else
 //                     sprint = Input.GetKey(KeyCode.LeftShift);
+                
+//                 if(mobileControls.wheelie !=null)
+//                     wheelieInput = mobileControls.wheelie.buttonPressed == 1? true : false;
 
 //                 //Stateful Input - bunny hopping
 //                 if(mobileControls.bHop != null)
@@ -941,6 +982,7 @@ namespace SBPScripts
 //                     bunnyHopInputState = -1;
 //                 else
 //                     bunnyHopInputState = 0;}
+
 
 //                 //Record
 //                 if (wayPointSystem.recordingState == WayPointSystem.RecordingState.Record)
